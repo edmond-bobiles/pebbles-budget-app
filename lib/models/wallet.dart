@@ -1,0 +1,3 @@
+class Wallet {
+  double balance;
+}
