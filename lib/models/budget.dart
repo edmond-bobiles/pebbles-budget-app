@@ -2,7 +2,7 @@ class Budget {
   final String id;
   final String category;
   final double limit;
-  final String month; // e.g. "2025-11" to represent the month
+  final String month; // e.g. "2025-11"
   double spent;
 
   Budget({

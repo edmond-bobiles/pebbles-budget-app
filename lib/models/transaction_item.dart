@@ -4,7 +4,7 @@ class TransactionItem {
   final double amount;
   final String category;
   final DateTime date;
-  final bool isExpense; // true = expense, false = income
+  final bool isExpense;
 
   TransactionItem({
     required this.id,
