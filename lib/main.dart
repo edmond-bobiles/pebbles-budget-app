@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 
 void main() {
-  runApp(const BudgetTrackerApp());
+  runApp(const PebblesApp());
 }
 
-class BudgetTrackerApp extends StatelessWidget {
-  const BudgetTrackerApp({super.key});
+class PebblesApp extends StatelessWidget {
+  const PebblesApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+    return MaterialApp(
+      title: 'Pebbles Budget App',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        useMaterial3: true,
+      ),
+      home: const LoginScreen(),
     );
   }
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
 import 'home_screen.dart';
-import 'main_nav.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,26 +9,26 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  final AuthService _authService = AuthService();
-  String errorMessage = "";
+  String? errorMessage;
 
-  void handleLogin() {
-    final username = usernameController.text.trim();
-    final password = passwordController.text.trim();
+  final String correctUser = "budget";
+  final String correctPass = "pebbles";
 
-    final success = _authService.login(username, password);
+  void attemptLogin() {
+    final user = _usernameController.text.trim();
+    final pass = _passwordController.text.trim();
 
-    if (success) {
+    if (user == correctUser && pass == correctPass) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainNav()),
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } else {
       setState(() {
-        errorMessage = "Invalid username or password";
+        errorMessage = "Incorrect username or password.";
       });
     }
   }
@@ -39,32 +37,53 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                controller: usernameController,
-                decoration: const InputDecoration(labelText: "Username"),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Budget App"),
+
+            const SizedBox(height: 20),
+
+            // Username
+            SizedBox(
+              width: 250,
+              child: TextField(
+                controller: _usernameController,
+                decoration: const InputDecoration(
+                  labelText: "Username",
+                ),
               ),
-              TextField(
-                controller: passwordController,
+            ),
+
+            const SizedBox(height: 10),
+
+            // Password
+            SizedBox(
+              width: 250,
+              child: TextField(
+                controller: _passwordController,
+                decoration: const InputDecoration(
+                  labelText: "Password",
+                ),
                 obscureText: true,
-                decoration: const InputDecoration(labelText: "Password"),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: handleLogin,
-                child: const Text("Login"),
-              ),
-              const SizedBox(height: 10),
+            ),
+
+            const SizedBox(height: 10),
+
+            if (errorMessage != null)
               Text(
-                errorMessage,
+                errorMessage!,
                 style: const TextStyle(color: Colors.red),
-              )
-            ],
-          ),
+              ),
+
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: attemptLogin,
+              child: const Text("Login"),
+            ),
+          ],
         ),
       ),
     );

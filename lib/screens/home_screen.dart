@@ -5,8 +5,13 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text("Home Screen"),
+    return Scaffold(
+      body: Center(
+        child: Text(
+          "Home Screen (Navigation will be added here)",
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
     );
   }
 }
