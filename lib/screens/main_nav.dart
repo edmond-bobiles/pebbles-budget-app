@@ -2,64 +2,41 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'transactions_screen.dart';
 import 'add_screen.dart';
-import 'budgets_screen.dart';
-import 'accounts_screen.dart';
+import 'budget_screen.dart';
+import 'account_screen.dart';
 
-class MainNav extends StatefulWidget {
-  const MainNav({super.key});
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
 
   @override
-  State<MainNav> createState() => _MainNavState();
+  State<MainNavigation> createState() => _MainNavigationState();
 }
 
-class _MainNavState extends State<MainNav> {
-  int _selectedIndex = 0;
+class _MainNavigationState extends State<MainNavigation> {
+  int _index = 0;
 
-  final List<Widget> _screens = const [
+  final List<Widget> _pages = const [
     HomeScreen(),
     TransactionsScreen(),
     AddScreen(),
-    BudgetsScreen(),
-    AccountsScreen(),
+    BudgetScreen(),
+    AccountScreen(),
   ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
-
+      body: _pages[_index],
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _index,
+        onTap: (i) => setState(() => _index = i),
         type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Transactions',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: 'Add',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pie_chart),
-            label: 'Budgets',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Accounts',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: "Transactions"),
+          BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: "Add"),
+          BottomNavigationBarItem(icon: Icon(Icons.pie_chart_outline), label: "Budgets"),
+          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: "Accounts"),
         ],
       ),
     );
