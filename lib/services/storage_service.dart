@@ -1,4 +1,3 @@
-// lib/services/storage_service.dart
 import 'package:flutter/foundation.dart';
 import '../models/transaction_item.dart';
 import '../models/budget.dart';
@@ -27,9 +26,7 @@ class StorageService {
     "password": "pebbles"
   };
 
-  // -------------------------------
-  // WALLET
-  // -------------------------------
+  // Wallet
   void updateWallet(Wallet w) {
     wallet = w;
     walletNotifier.value = wallet;
@@ -37,9 +34,7 @@ class StorageService {
 
   Wallet getWallet() => wallet;
 
-  // -------------------------------
-  // TRANSACTIONS
-  // -------------------------------
+  // Transactions
   void addTransaction(TransactionItem t) {
     _transactions.add(t);
 
@@ -51,7 +46,7 @@ class StorageService {
     }
     walletNotifier.value = wallet;
 
-    // update budgets spent if applicable
+    // update budgets spent
     for (var b in _budgets) {
       final sameMonth = t.date.year.toString() + "-" + t.date.month.toString().padLeft(2, '0');
       if (b.category == t.category && b.month == sameMonth && t.isExpense) {
@@ -79,7 +74,7 @@ class StorageService {
     }
     walletNotifier.value = wallet;
 
-    // reverse budget spent if applicable
+    // reverse budget spent
     for (var b in _budgets) {
       final sameMonth = t.date.year.toString() + "-" + t.date.month.toString().padLeft(2, '0');
       if (b.category == t.category && b.month == sameMonth && t.isExpense) {
@@ -110,9 +105,7 @@ class StorageService {
     return map;
   }
 
-  // -------------------------------
-  // BUDGETS
-  // -------------------------------
+  // budgets
   void addBudget(Budget b) {
     _budgets.add(b);
     budgetsNotifier.value = List<Budget>.from(_budgets);
@@ -120,9 +113,7 @@ class StorageService {
 
   List<Budget> getAllBudgets() => List.unmodifiable(_budgets);
 
-  // -------------------------------
-  // MONTHLY TOTALS
-  // -------------------------------
+  // monthly totals
   double totalExpensesForMonth(int year, int month) {
     return getTransactionsForMonth(year, month)
         .where((t) => t.isExpense)

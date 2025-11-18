@@ -1,4 +1,3 @@
-// lib/screens/budget_screen.dart
 import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
 import '../models/budget.dart';
@@ -19,7 +18,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
       context,
       MaterialPageRoute(builder: (_) => const AddBudgetScreen()),
     );
-    // no manual reload needed — we use the notifier below
   }
 
   @override
@@ -29,13 +27,15 @@ class _BudgetScreenState extends State<BudgetScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            const SizedBox(height: 40),
+
             ElevatedButton(
               onPressed: _openCreateBudget,
               child: const Text("Create Budget"),
             ),
+
             const SizedBox(height: 16),
 
-            // Listen to budgetsNotifier so remaining updates immediately
             Expanded(
               child: ValueListenableBuilder<List<Budget>>(
                 valueListenable: _storage.budgetsNotifier,

@@ -1,4 +1,3 @@
-// lib/screens/transactions_screen.dart
 import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
 import '../models/transaction_item.dart';
