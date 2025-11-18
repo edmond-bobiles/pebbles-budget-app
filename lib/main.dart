@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
+import 'services/storage_service.dart';
+
+// Instance of storage
+final storage = StorageService();
 
 void main() {
   runApp(const PebblesApp());
@@ -11,6 +15,7 @@ class PebblesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Pebbles Budget App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),

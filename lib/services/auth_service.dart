@@ -3,7 +3,6 @@ class AuthService {
   static const String password = "pebbles";
 
   bool login(String username, String password) {
-    return username == username &&
-        password == password;
+    return username == username && password == password;
   }
 }
