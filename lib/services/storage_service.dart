@@ -1,111 +1,134 @@
+// lib/services/storage_service.dart
+import 'package:flutter/foundation.dart';
 import '../models/transaction_item.dart';
 import '../models/budget.dart';
 import '../models/wallet.dart';
 
 class StorageService {
+  // singleton
+  StorageService._private();
+  static final StorageService instance = StorageService._private();
+
   // Wallet
   Wallet wallet = Wallet(balance: 0.0);
 
-  // List of needed data
-  List<TransactionItem> transactions = [];
-  List<Budget> budgets = [];
+  // Data lists
+  final List<TransactionItem> _transactions = [];
+  final List<Budget> _budgets = [];
 
-  // User
+  // Notifiers so UI can react
+  final ValueNotifier<List<TransactionItem>> transactionsNotifier = ValueNotifier([]);
+  final ValueNotifier<Wallet> walletNotifier = ValueNotifier(Wallet(balance: 0.0));
+  final ValueNotifier<List<Budget>> budgetsNotifier = ValueNotifier([]);
+
+  // User (static)
   final Map<String, String> user = {
     "username": "budget",
     "password": "pebbles"
   };
 
-  // Wallet update logic
+  // -------------------------------
+  // WALLET
+  // -------------------------------
   void updateWallet(Wallet w) {
     wallet = w;
+    walletNotifier.value = wallet;
   }
 
-  Wallet getWallet() {
-    return wallet;
-  }
+  Wallet getWallet() => wallet;
 
-  // Add transaction logic
+  // -------------------------------
+  // TRANSACTIONS
+  // -------------------------------
   void addTransaction(TransactionItem t) {
-    transactions.add(t);
+    _transactions.add(t);
 
-    // 1. update wallet balance
+    // update wallet balance
     if (t.isExpense) {
-      wallet.balance -= t.amount; // subtracts the balance
+      wallet.balance -= t.amount;
     } else {
-      wallet.balance += t.amount; // adds income to the balance
+      wallet.balance += t.amount;
     }
+    walletNotifier.value = wallet;
 
-    // 2. update budgets
-    for (var b in budgets) {
+    // update budgets spent if applicable
+    for (var b in _budgets) {
       final sameMonth = t.date.year.toString() + "-" + t.date.month.toString().padLeft(2, '0');
       if (b.category == t.category && b.month == sameMonth && t.isExpense) {
         b.spent += t.amount;
       }
     }
+    // refresh budgets notifier
+    budgetsNotifier.value = List<Budget>.from(_budgets);
+
+    // refresh transactions notifier
+    transactionsNotifier.value = List<TransactionItem>.from(_transactions);
   }
 
-  // Delete transaction
   void deleteTransaction(String id) {
-    final t = transactions.firstWhere((x) => x.id == id);
-    transactions.removeWhere((x) => x.id == id);
+    final index = _transactions.indexWhere((x) => x.id == id);
+    if (index == -1) return;
+    final t = _transactions[index];
+    _transactions.removeAt(index);
 
-    // Reverse effect on wallet
+    // reverse wallet effect
     if (t.isExpense) {
       wallet.balance += t.amount;
     } else {
       wallet.balance -= t.amount;
     }
+    walletNotifier.value = wallet;
 
-    // Reverse budget spent
-    for (var b in budgets) {
+    // reverse budget spent if applicable
+    for (var b in _budgets) {
       final sameMonth = t.date.year.toString() + "-" + t.date.month.toString().padLeft(2, '0');
       if (b.category == t.category && b.month == sameMonth && t.isExpense) {
         b.spent -= t.amount;
       }
     }
+    budgetsNotifier.value = List<Budget>.from(_budgets);
+
+    // refresh transactions notifier
+    transactionsNotifier.value = List<TransactionItem>.from(_transactions);
   }
 
-  List<TransactionItem> getAllTransactions() {
-    return transactions;
-  }
+  List<TransactionItem> getAllTransactions() => List.unmodifiable(_transactions);
 
-  // Gets monthly transaction
   List<TransactionItem> getTransactionsForMonth(int year, int month) {
-    return transactions
+    return _transactions
         .where((t) => t.date.year == year && t.date.month == month)
         .toList()
       ..sort((a, b) => b.date.compareTo(a.date));
   }
 
-  // Gets the category total for month
   Map<String, double> categoryTotalsForMonth(int year, int month) {
     final items = getTransactionsForMonth(year, month);
     final Map<String, double> map = {};
-
     for (var t in items.where((x) => x.isExpense)) {
       map[t.category] = (map[t.category] ?? 0) + t.amount;
     }
     return map;
   }
 
-  // adds the budget
+  // -------------------------------
+  // BUDGETS
+  // -------------------------------
   void addBudget(Budget b) {
-    budgets.add(b);
+    _budgets.add(b);
+    budgetsNotifier.value = List<Budget>.from(_budgets);
   }
 
-  List<Budget> getAllBudgets() {
-    return budgets;
-  }
+  List<Budget> getAllBudgets() => List.unmodifiable(_budgets);
 
-  // gets the total expense for month
+  // -------------------------------
+  // MONTHLY TOTALS
+  // -------------------------------
   double totalExpensesForMonth(int year, int month) {
     return getTransactionsForMonth(year, month)
         .where((t) => t.isExpense)
         .fold(0.0, (sum, t) => sum + t.amount);
   }
 
-  // gets the total income for month
   double totalIncomeForMonth(int year, int month) {
     return getTransactionsForMonth(year, month)
         .where((t) => !t.isExpense)
