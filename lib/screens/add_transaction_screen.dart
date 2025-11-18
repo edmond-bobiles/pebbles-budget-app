@@ -15,16 +15,19 @@ class _AddScreenState extends State<AddScreen> {
   String _selectedType = 'Expense'; // "Expense" or "Income"
   DateTime _selectedDate = DateTime.now();
 
-  // categories split by type
+  // Expense categories (match budget categories)
   final List<String> _expenseCategories = [
-    'Food & Beverage',
-    'Transport',
+    'Bills & Utilities',
+    'Education',
     'Shopping',
-    'Bills',
-    'Entertainment',
-    'Other'
+    'Transportation',
+    'Family',
+    'Food & Beverage',
+    'Health & Fitness',
+    'Others'
   ];
 
+  // Income categories
   final List<String> _incomeCategories = [
     'Salary',
     'Incoming Transfer',
@@ -67,7 +70,7 @@ class _AddScreenState extends State<AddScreen> {
     final isExpense = _selectedType == 'Expense';
     final tx = TransactionItem(
       id: id,
-      title: _selectedType, // Title is now either "Expense" or "Income"
+      title: _selectedType, // "Expense" or "Income"
       amount: amount,
       category: _selectedCategory,
       date: _selectedDate,
@@ -95,7 +98,7 @@ class _AddScreenState extends State<AddScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // determine category list based on type
+    // pick correct category list based on type
     final categories = _selectedType == 'Expense' ? _expenseCategories : _incomeCategories;
 
     // ensure selected category valid for the new list
@@ -127,7 +130,6 @@ class _AddScreenState extends State<AddScreen> {
                     if (v != null) {
                       setState(() {
                         _selectedType = v;
-                        // change selectedCategory to first of the appropriate list
                         _selectedCategory = (_selectedType == 'Expense') ? _expenseCategories.first : _incomeCategories.first;
                       });
                     }
