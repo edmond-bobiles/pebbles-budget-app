@@ -1,9 +1,12 @@
+// lib/screens/add_budget_screen.dart
 import 'package:flutter/material.dart';
 import '../models/budget.dart';
 import '../services/storage_service.dart';
 
 class AddBudgetScreen extends StatefulWidget {
-  const AddBudgetScreen({super.key});
+  // optional budget to edit; if null -> create new
+  final Budget? budget;
+  const AddBudgetScreen({super.key, this.budget});
 
   @override
   State<AddBudgetScreen> createState() => _AddBudgetScreenState();
@@ -23,15 +26,24 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
     'Others'
   ];
 
-  String _selectedCategory = 'Bills & Utilities';
-
+  late String _selectedCategory;
   late String _currentMonth;
+  bool get isEditMode => widget.budget != null;
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _currentMonth = "${now.year}-${now.month.toString().padLeft(2, '0')}";
+
+    if (isEditMode) {
+      final b = widget.budget!;
+      _selectedCategory = b.category;
+      _amountController.text = b.limit.toString();
+      _currentMonth = b.month; // keep existing month
+    } else {
+      _selectedCategory = _categories.first;
+    }
   }
 
   void _submit() {
@@ -50,15 +62,28 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
       return;
     }
 
-    final newBudget = Budget(
-      id: "b-${DateTime.now().millisecondsSinceEpoch}",
-      category: _selectedCategory,
-      limit: amount,
-      month: _currentMonth,
-      spent: 0.0,
-    );
-
-    StorageService.instance.addBudget(newBudget);
+    if (isEditMode) {
+      final existing = widget.budget!;
+      final updated = Budget(
+        id: existing.id,
+        category: _selectedCategory,
+        limit: amount,
+        month: existing.month,
+        spent: existing.spent, // preserve spent
+      );
+      StorageService.instance.updateBudget(updated);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Budget updated')));
+    } else {
+      final newBudget = Budget(
+        id: "b-${DateTime.now().millisecondsSinceEpoch}",
+        category: _selectedCategory,
+        limit: amount,
+        month: _currentMonth,
+        spent: 0.0,
+      );
+      StorageService.instance.addBudget(newBudget);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Budget created')));
+    }
 
     Navigator.pop(context);
   }
@@ -72,7 +97,9 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Budget")),
+      appBar: AppBar(
+        title: Text(isEditMode ? 'Edit Budget' : 'Create Budget'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -96,12 +123,13 @@ class _AddBudgetScreenState extends State<AddBudgetScreen> {
             ),
             const SizedBox(height: 16),
 
+            // show month but don't allow editing here to keep things simple
             Text("Month: $_currentMonth"),
 
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _submit,
-              child: const Text("Save Budget"),
+              child: Text(isEditMode ? 'Save changes' : 'Save Budget'),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+// lib/screens/budget_screen.dart
 import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
 import '../models/budget.dart';
@@ -18,6 +19,32 @@ class _BudgetScreenState extends State<BudgetScreen> {
       context,
       MaterialPageRoute(builder: (_) => const AddBudgetScreen()),
     );
+  }
+
+  void _editBudget(Budget b) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => AddBudgetScreen(budget: b)),
+    );
+  }
+
+  void _confirmDelete(Budget b) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete budget?'),
+        content: Text('Are you sure you want to delete the budget "${b.category}" for ${b.month}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      StorageService.instance.deleteBudget(b.id);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Budget deleted')));
+    }
   }
 
   @override
@@ -49,11 +76,25 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     itemBuilder: (context, index) {
                       final b = budgets[index];
                       final remaining = b.limit - b.spent;
+                      final pctUsed = b.limit > 0 ? (b.spent / b.limit).clamp(0.0, 1.0) : 0.0;
 
                       return Card(
                         child: ListTile(
                           title: Text(b.category),
-                          subtitle: Text("Month: ${b.month}"),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Month: ${b.month}"),
+                              const SizedBox(height: 6),
+                              LinearProgressIndicator(
+                                value: pctUsed,
+                                minHeight: 8,
+                                backgroundColor: Colors.grey[300],
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    pctUsed >= 1.0 ? Colors.red : Colors.green),
+                              ),
+                            ],
+                          ),
                           trailing: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -68,6 +109,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
                               ),
                             ],
                           ),
+                          // show edit/delete menu
+                          onTap: () => _editBudget(b),
+                          onLongPress: () => _confirmDelete(b),
                         ),
                       );
                     },
