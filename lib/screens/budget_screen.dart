@@ -1,4 +1,4 @@
-// lib/screens/budget_screen.dart
+                      // lib/screens/budget_screen.dart
 import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
 import '../models/budget.dart';
@@ -49,77 +49,286 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
+    final theme = Theme.of(context);
+    final blueScheme = theme.colorScheme;
+    
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            blueScheme.primaryContainer.withOpacity(0.3),
+            blueScheme.surface,
+          ],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                
+                // Cute header
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: blueScheme.primary,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Text('📊', style: TextStyle(fontSize: 24)),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Budgets',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: blueScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
 
-            ElevatedButton(
-              onPressed: _openCreateBudget,
-              child: const Text("Create Budget"),
-            ),
+                const SizedBox(height: 24),
 
-            const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: blueScheme.primary.withOpacity(0.3),
+                        blurRadius: 15,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton.icon(
+                    onPressed: _openCreateBudget,
+                    icon: const Icon(Icons.add_circle_outline, size: 24),
+                    label: const Text(
+                      "Create Budget",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: blueScheme.primary,
+                      foregroundColor: blueScheme.onPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                    ),
+                  ),
+                ),
 
-            Expanded(
-              child: ValueListenableBuilder<List<Budget>>(
-                valueListenable: _storage.budgetsNotifier,
-                builder: (context, budgets, _) {
-                  if (budgets.isEmpty) {
-                    return const Center(child: Text("No budgets created yet"));
-                  }
+                const SizedBox(height: 24),
 
-                  return ListView.builder(
-                    itemCount: budgets.length,
-                    itemBuilder: (context, index) {
-                      final b = budgets[index];
-                      final remaining = b.limit - b.spent;
-                      final pctUsed = b.limit > 0 ? (b.spent / b.limit).clamp(0.0, 1.0) : 0.0;
-
-                      return Card(
-                        child: ListTile(
-                          title: Text(b.category),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Month: ${b.month}"),
-                              const SizedBox(height: 6),
-                              LinearProgressIndicator(
-                                value: pctUsed,
-                                minHeight: 8,
-                                backgroundColor: Colors.grey[300],
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    pctUsed >= 1.0 ? Colors.red : Colors.green),
-                              ),
-                            ],
-                          ),
-                          trailing: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                Expanded(
+                  child: ValueListenableBuilder<List<Budget>>(
+                    valueListenable: _storage.budgetsNotifier,
+                    builder: (context, budgets, _) {
+                      if (budgets.isEmpty) {
+                        return Center(
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text("Limit: ₱${b.limit.toStringAsFixed(2)}"),
-                              Text("Spent: ₱${b.spent.toStringAsFixed(2)}"),
+                              Text('📝', style: TextStyle(fontSize: 64)),
+                              const SizedBox(height: 16),
                               Text(
-                                "Remaining: ₱${remaining.toStringAsFixed(2)}",
+                                "No budgets created yet",
                                 style: TextStyle(
-                                  color: remaining < 0 ? Colors.red : Colors.green,
+                                  fontSize: 18,
+                                  color: blueScheme.onSurface.withOpacity(0.6),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Create your first budget! 🎯",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: blueScheme.onSurface.withOpacity(0.5),
                                 ),
                               ),
                             ],
                           ),
-                          // show edit/delete menu
-                          onTap: () => _editBudget(b),
-                          onLongPress: () => _confirmDelete(b),
-                        ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        itemCount: budgets.length,
+                        itemBuilder: (context, index) {
+                          final b = budgets[index];
+                          final remaining = b.limit - b.spent;
+                          final pctUsed = b.limit > 0 ? (b.spent / b.limit).clamp(0.0, 1.0) : 0.0;
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            child: Card(
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: InkWell(
+                                onTap: () => _editBudget(b),
+                                onLongPress: () => _confirmDelete(b),
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        blueScheme.surface,
+                                        blueScheme.primaryContainer.withOpacity(0.3),
+                                      ],
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: blueScheme.primaryContainer,
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: const Text('📦', style: TextStyle(fontSize: 24)),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    b.category,
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: blueScheme.primary,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    "Month: ${b.month}",
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: blueScheme.onSurface.withOpacity(0.6),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 16),
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(10),
+                                          child: LinearProgressIndicator(
+                                            value: pctUsed,
+                                            minHeight: 14,
+                                            backgroundColor: Colors.grey[200],
+                                            valueColor: AlwaysStoppedAnimation<Color>(
+                                                pctUsed >= 1.0 ? Colors.red.shade400 : Colors.green.shade400),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  "Limit",
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: blueScheme.onSurface.withOpacity(0.6),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "₱${b.limit.toStringAsFixed(2)}",
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: blueScheme.primary,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  "Spent",
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: blueScheme.onSurface.withOpacity(0.6),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "₱${b.spent.toStringAsFixed(2)}",
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: blueScheme.onSurface,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: [
+                                                Text(
+                                                  "Remaining",
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: blueScheme.onSurface.withOpacity(0.6),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "₱${remaining.toStringAsFixed(2)}",
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: remaining < 0 ? Colors.red.shade700 : Colors.green.shade700,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          "Tap to edit • Long press to delete",
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: blueScheme.onSurface.withOpacity(0.4),
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
