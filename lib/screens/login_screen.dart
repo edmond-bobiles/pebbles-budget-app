@@ -21,18 +21,45 @@ class _LoginScreenState extends State<LoginScreen> {
     final user = _usernameController.text.trim();
     final pass = _passwordController.text.trim();
 
-    if (user == _correctUser && pass == _correctPass) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const MainNavigation(),
-        ),
-      );
-    } else {
+    // if blank inputs
+    if (user.isEmpty && pass.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your username and password.';
+      });
+      return;
+    }
+
+    // if username is empty
+    if (user.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your username.';
+      });
+      return;
+    }
+
+    // if password is empty
+    if (pass.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your password.';
+      });
+      return;
+    }
+
+    // if wrong credentials
+    if (user != _correctUser || pass != _correctPass) {
       setState(() {
         _errorMessage = 'Incorrect username or password.';
       });
+      return;
     }
+
+    // Success → go to main screen
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MainNavigation(),
+      ),
+    );
   }
 
   @override
@@ -102,7 +129,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 8),
                   const SizedBox(height: 40),
 
                   // Username
@@ -178,6 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 20),
 
+                  // Error Message
                   if (_errorMessage != null) ...[
                     Container(
                       padding: const EdgeInsets.all(12),
